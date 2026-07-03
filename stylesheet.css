@@ -25,7 +25,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-image: url('background.jpg');
+    background-image: url('assets/background.jpg');
 }
 
 .login-card, .success-card {
