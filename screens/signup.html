@@ -14,20 +14,78 @@
             <a href="signup.html" class="tab-btn active">Sign Up</a>
         </div>
 
-        <form action="verification.html" method="GET">
+        <form id="signupForm">
             <div class="form-group">
-                <input type="text" placeholder="Username or email" required>
+                <input type="email" id="signupEmail" placeholder="Email address" required>
             </div>
             <div class="form-group">
-                <input type="password" placeholder="Password" required>
+                <input type="password" id="signupPassword" placeholder="Password" required>
             </div>
             <div class="form-group">
-                <input type="password" placeholder="Confirm Password" required>
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
             </div>
             
             <button type="submit" class="login-btn">Sign Up</button>
+            <div id="signupError" style="color: red; margin-top: 10px; display: none;"></div>
         </form>
     </div>
+
+    <script type="module">
+        import { auth } from "../firebase-config.js";
+        import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+        const signupForm = document.getElementById("signupForm");
+        const signupError = document.getElementById("signupError");
+
+        signupForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById("signupEmail").value;
+            const password = document.getElementById("signupPassword").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                signupError.style.display = "block";
+                signupError.textContent = "Passwords do not match.";
+                return;
+            }
+
+            // Validate password strength
+            if (password.length < 6) {
+                signupError.style.display = "block";
+                signupError.textContent = "Password must be at least 6 characters long.";
+                return;
+            }
+
+            try {
+                signupError.style.display = "none";
+                signupError.textContent = "";
+
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                console.log("User created:", userCredential.user);
+                
+                // Redirect to verification page on successful signup
+                window.location.href = "verification.html";
+            } catch (error) {
+                console.error("Signup error:", error.code, error.message);
+                signupError.style.display = "block";
+                
+                // Provide user-friendly error messages
+                if (error.code === "auth/invalid-email") {
+                    signupError.textContent = "Invalid email address.";
+                } else if (error.code === "auth/email-already-in-use") {
+                    signupError.textContent = "This email is already registered. Try logging in.";
+                } else if (error.code === "auth/weak-password") {
+                    signupError.textContent = "Password is too weak. Use a stronger password.";
+                } else if (error.code === "auth/operation-not-allowed") {
+                    signupError.textContent = "Sign up is currently disabled.";
+                } else {
+                    signupError.textContent = "Sign up failed: " + error.message;
+                }
+            }
+        });
+    </script>
 
 </body>
 </html>

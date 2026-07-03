@@ -14,17 +14,60 @@
             <a href="signup.html" class="tab-btn">Sign Up</a>
         </div>
 
-        <div>
+        <form id="loginForm">
             <div class="form-group">
-                <input type="text" placeholder="adam@gmail.com" required>
+                <input type="email" id="loginEmail" placeholder="adam@gmail.com" required>
             </div>
             <div class="form-group">
-                <input type="password" placeholder="**********" required>
+                <input type="password" id="loginPassword" placeholder="**********" required>
             </div>
             
-            <button type="button" class="login-btn" onclick="window.location.href='homepage.html'">Login</button>
-        </div>
+            <button type="submit" class="login-btn">Login</button>
+            <div id="loginError" style="color: red; margin-top: 10px; display: none;"></div>
+        </form>
     </div>
+
+    <script type="module">
+        import { auth } from "../firebase-config.js";
+        import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+        const loginForm = document.getElementById("loginForm");
+        const loginError = document.getElementById("loginError");
+
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById("loginEmail").value;
+            const password = document.getElementById("loginPassword").value;
+
+            try {
+                loginError.style.display = "none";
+                loginError.textContent = "";
+
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log("User logged in:", userCredential.user);
+                
+                // Redirect to homepage on successful login
+                window.location.href = "homepage.html";
+            } catch (error) {
+                console.error("Login error:", error.code, error.message);
+                loginError.style.display = "block";
+                
+                // Provide user-friendly error messages
+                if (error.code === "auth/invalid-email") {
+                    loginError.textContent = "Invalid email address.";
+                } else if (error.code === "auth/user-not-found") {
+                    loginError.textContent = "No account found with this email.";
+                } else if (error.code === "auth/wrong-password") {
+                    loginError.textContent = "Incorrect password.";
+                } else if (error.code === "auth/too-many-requests") {
+                    loginError.textContent = "Too many failed login attempts. Try again later.";
+                } else {
+                    loginError.textContent = "Login failed: " + error.message;
+                }
+            }
+        });
+    </script>
 
 </body>
 </html>
