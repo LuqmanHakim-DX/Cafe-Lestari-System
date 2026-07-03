@@ -89,9 +89,7 @@
         }
 
         document.getElementById('checkout-button').addEventListener('click', () => {
-            localStorage.removeItem(CART_KEY);
-            alert('Order placed successfully!');
-            window.location.href = 'homepage.html';
+            window.location.href = 'payment.html';
         });
 
         window.addEventListener('load', () => {
