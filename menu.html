@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu - Lestari Cafe</title>
+    <link rel="stylesheet" href="stylesheet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="homepage-body">
+
+    <header class="page-header">
+        <i class="fas fa-chevron-left" onclick="window.location.href='homepage.html'"></i>
+        <h1>Menu</h1>
+        <div class="header-icons">
+            <i class="fas fa-home" onclick="window.location.href='homepage.html'"></i>
+            <a href="checkout.html" class="icon-button">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="cart-count" class="cart-badge">0</span>
+            </a>
+            <i class="fas fa-user" onclick="window.location.href='profile.html'"></i>
+        </div>
+    </header>
+
+    <div class="page-content">
+        <section class="menu-actions">
+            <button class="order-now-btn" onclick="window.location.href='checkout.html'">View Cart</button>
+        </section>
+
+        <section class="menu-section">
+            <h2>Best Sellers</h2>
+            <div class="menu-grid">
+                <article class="menu-card">
+                    <div>
+                        <h3>Nasi Goreng Kampung</h3>
+                        <p>Fried rice with egg, chicken, and sambal.</p>
+                    </div>
+                    <div class="menu-card-footer">
+                        <span>RM5.00</span>
+                        <button class="add-btn" onclick="addToCart('Nasi Goreng Kampung', 5.00)">Add</button>
+                    </div>
+                </article>
+                <article class="menu-card">
+                    <div>
+                        <h3>Mee Goreng</h3>
+                        <p>Classic stir-fried noodles with vegetables.</p>
+                    </div>
+                    <div class="menu-card-footer">
+                        <span>RM4.00</span>
+                        <button class="add-btn" onclick="addToCart('Mee Goreng', 4.00)">Add</button>
+                    </div>
+                </article>
+                <article class="menu-card">
+                    <div>
+                        <h3>Nasi Lemak</h3>
+                        <p>Coconut rice served with sambal and egg.</p>
+                    </div>
+                    <div class="menu-card-footer">
+                        <span>RM4.50</span>
+                        <button class="add-btn" onclick="addToCart('Nasi Lemak', 4.50)">Add</button>
+                    </div>
+                </article>
+                <article class="menu-card">
+                    <div>
+                        <h3>Teh Tarik</h3>
+                        <p>Creamy milk tea pulled to perfection.</p>
+                    </div>
+                    <div class="menu-card-footer">
+                        <span>RM2.50</span>
+                        <button class="add-btn" onclick="addToCart('Teh Tarik', 2.50)">Add</button>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const CART_KEY = 'lestariCart';
+
+        function getCart() {
+            const saved = localStorage.getItem(CART_KEY);
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function saveCart(cart) {
+            localStorage.setItem(CART_KEY, JSON.stringify(cart));
+        }
+
+        function updateCount() {
+            const cart = getCart();
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cart-count').textContent = count;
+        }
+
+        function addToCart(name, price) {
+            const cart = getCart();
+            const existing = cart.find(item => item.name === name);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({ name, price, quantity: 1 });
+            }
+            saveCart(cart);
+            updateCount();
+            alert(`${name} added to cart.`);
+        }
+
+        window.addEventListener('load', updateCount);
+    </script>
+
+</body>
+</html>
