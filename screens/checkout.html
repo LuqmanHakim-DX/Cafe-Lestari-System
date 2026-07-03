@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Lestari Cafe</title>
+    <link rel="stylesheet" href="..\/stylesheet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="homepage-body">
+
+    <header class="page-header">
+        <i class="fas fa-chevron-left" onclick="window.location.href='menu.html'"></i>
+        <h1>Checkout</h1>
+        <div class="header-icons">
+            <i class="fas fa-home" onclick="window.location.href='homepage.html'"></i>
+            <i class="fas fa-user" onclick="window.location.href='profile.html'"></i>
+        </div>
+    </header>
+
+    <div class="page-content">
+        <section class="checkout-list">
+            <h2>Your Cart</h2>
+            <div id="cart-items"></div>
+            <div class="cart-total" id="cart-total"></div>
+            <button class="order-now-btn" id="checkout-button">Place Order</button>
+        </section>
+    </div>
+
+    <script>
+        const CART_KEY = 'lestariCart';
+
+        function getCart() {
+            const saved = localStorage.getItem(CART_KEY);
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function saveCart(cart) {
+            localStorage.setItem(CART_KEY, JSON.stringify(cart));
+        }
+
+        function renderCart() {
+            const cart = getCart();
+            const container = document.getElementById('cart-items');
+            container.innerHTML = '';
+            if (cart.length === 0) {
+                container.innerHTML = '<p class="empty-cart">Your cart is empty.</p>';
+                document.getElementById('cart-total').textContent = '';
+                document.getElementById('checkout-button').disabled = true;
+                return;
+            }
+            let total = 0;
+            cart.forEach((item, index) => {
+                total += item.price * item.quantity;
+                container.innerHTML += `
+                    <div class="cart-item">
+                        <div>
+                            <h3>${item.name}</h3>
+                            <p>${item.quantity} x RM${item.price.toFixed(2)}</p>
+                        </div>
+                        <div class="cart-actions">
+                            <button onclick="updateQuantity(${index}, -1)">-</button>
+                            <span>${item.quantity}</span>
+                            <button onclick="updateQuantity(${index}, 1)">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('cart-total').textContent = `Total: RM${total.toFixed(2)}`;
+            document.getElementById('checkout-button').disabled = false;
+        }
+
+        function updateQuantity(index, delta) {
+            const cart = getCart();
+            cart[index].quantity += delta;
+            if (cart[index].quantity <= 0) {
+                cart.splice(index, 1);
+            }
+            saveCart(cart);
+            renderCart();
+            updateCartBadge();
+        }
+
+        function updateCartBadge() {
+            const cart = getCart();
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cart-count');
+            if (badge) badge.textContent = count;
+        }
+
+        document.getElementById('checkout-button').addEventListener('click', () => {
+            window.location.href = 'payment.html';
+        });
+
+        window.addEventListener('load', () => {
+            renderCart();
+            updateCartBadge();
+        });
+    </script>
+
+</body>
+</html>
