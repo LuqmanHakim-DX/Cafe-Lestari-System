@@ -29,53 +29,13 @@
 
         <section class="menu-section">
             <h2>Best Sellers</h2>
-            <div class="menu-grid">
-                <article class="menu-card">
-                    <div>
-                        <h3>Nasi Goreng Kampung</h3>
-                        <p>Fried rice with egg, chicken, and sambal.</p>
-                    </div>
-                    <div class="menu-card-footer">
-                        <span>RM5.00</span>
-                        <button class="add-btn" onclick="addToCart('Nasi Goreng Kampung', 5.00)">Add</button>
-                    </div>
-                </article>
-                <article class="menu-card">
-                    <div>
-                        <h3>Mee Goreng</h3>
-                        <p>Classic stir-fried noodles with vegetables.</p>
-                    </div>
-                    <div class="menu-card-footer">
-                        <span>RM4.00</span>
-                        <button class="add-btn" onclick="addToCart('Mee Goreng', 4.00)">Add</button>
-                    </div>
-                </article>
-                <article class="menu-card">
-                    <div>
-                        <h3>Nasi Lemak</h3>
-                        <p>Coconut rice served with sambal and egg.</p>
-                    </div>
-                    <div class="menu-card-footer">
-                        <span>RM4.50</span>
-                        <button class="add-btn" onclick="addToCart('Nasi Lemak', 4.50)">Add</button>
-                    </div>
-                </article>
-                <article class="menu-card">
-                    <div>
-                        <h3>Teh Tarik</h3>
-                        <p>Creamy milk tea pulled to perfection.</p>
-                    </div>
-                    <div class="menu-card-footer">
-                        <span>RM2.50</span>
-                        <button class="add-btn" onclick="addToCart('Teh Tarik', 2.50)">Add</button>
-                    </div>
-                </article>
-            </div>
+            <div id="menu-grid" class="menu-grid"></div>
         </section>
     </div>
 
     <script>
         const CART_KEY = 'lestariCart';
+        const MENU_KEY = 'lestariMenuItems';
 
         function getCart() {
             const saved = localStorage.getItem(CART_KEY);
@@ -84,6 +44,52 @@
 
         function saveCart(cart) {
             localStorage.setItem(CART_KEY, JSON.stringify(cart));
+        }
+
+        function getMenuItems() {
+            const saved = localStorage.getItem(MENU_KEY);
+            if (!saved) {
+                const defaultMenu = [
+                    { name: 'Nasi Goreng Kampung', price: 5.00, description: 'Fried rice with egg, chicken, and sambal.' },
+                    { name: 'Mee Goreng', price: 4.00, description: 'Classic stir-fried noodles with vegetables.' },
+                    { name: 'Nasi Lemak', price: 4.50, description: 'Coconut rice served with sambal and egg.' },
+                    { name: 'Teh Tarik', price: 2.50, description: 'Creamy milk tea pulled to perfection.' }
+                ];
+                localStorage.setItem(MENU_KEY, JSON.stringify(defaultMenu));
+                return defaultMenu;
+            }
+
+            try {
+                const parsed = JSON.parse(saved);
+                return Array.isArray(parsed) && parsed.length ? parsed : [];
+            } catch (error) {
+                console.error('Unable to parse menu items', error);
+                return [];
+            }
+        }
+
+        function renderMenuItems() {
+            const menuItems = getMenuItems();
+            const container = document.getElementById('menu-grid');
+            if (!container) return;
+
+            if (!menuItems.length) {
+                container.innerHTML = '<p class="empty-cart">No menu items available right now.</p>';
+                return;
+            }
+
+            container.innerHTML = menuItems.map((item) => `
+                <article class="menu-card">
+                    <div>
+                        <h3>${item.name}</h3>
+                        <p>${item.description || 'Freshly prepared at Lestari Cafe.'}</p>
+                    </div>
+                    <div class="menu-card-footer">
+                        <span>RM${Number(item.price).toFixed(2)}</span>
+                        <button class="add-btn" onclick="addToCart('${item.name}', ${Number(item.price)})">Add</button>
+                    </div>
+                </article>
+            `).join('');
         }
 
         function updateCount() {
@@ -105,7 +111,10 @@
             alert(`${name} added to cart.`);
         }
 
-        window.addEventListener('load', updateCount);
+        window.addEventListener('load', () => {
+            renderMenuItems();
+            updateCount();
+        });
     </script>
 
 </body>

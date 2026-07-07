@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users - Lestari Cafe</title>
+    <link rel="stylesheet" href="../stylesheet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #555; }
+        .manage-users-page { max-width: 980px; margin: 0 auto; padding: 24px 20px 40px; color: #333; }
+        .card { background: #f3f3f3; border-radius: 12px; padding: 18px; box-shadow: 0 8px 20px rgba(0,0,0,0.12); margin-bottom: 18px; }
+        .actions { display:flex; gap:8px; align-items:center; }
+        .role-row { display:flex; justify-content:space-between; gap:12px; padding:10px; background:white; border-radius:10px; margin-bottom:8px; align-items:center; }
+        .small { font-size:0.9rem; color:#666; }
+        .icon-btn { border:none; border-radius:8px; padding:8px 10px; cursor:pointer; color:white; background:#333; }
+        .icon-btn.danger { background:#e74c3c; }
+    </style>
+</head>
+<body class="homepage-body">
+    <div class="manage-users-page">
+        <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <h2 style="margin:0">Manage Users & Roles</h2>
+                <div class="actions">
+                    <button class="order-now-btn" onclick="window.location.href='admin.html'">Back to Admin</button>
+                </div>
+            </div>
+
+            <p class="small">Assign or change a user's role. Roles are stored locally in your browser for this demo (`userRoles`).</p>
+
+            <form id="roleForm" class="manage-menu-form" style="margin-top:12px;">
+                <input id="userIdentifier" type="text" placeholder="User email or UID" required>
+                <select id="roleSelect">
+                    <option value="user">user</option>
+                    <option value="admin">admin</option>
+                </select>
+                <button class="login-btn" type="submit">Save Role</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-top:0">Current Roles</h3>
+            <div id="rolesList"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "../firebase-config.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { collection, getDocs, query, where, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // Render users from Firestore 'users' collection. Fallback to localStorage if Firestore unavailable.
+        async function renderRolesFromFirestore() {
+            try {
+                const q = await getDocs(collection(db, 'users'));
+                const list = document.getElementById('rolesList');
+                if (q.empty) {
+                    list.innerHTML = '<p class="small">No users found.</p>';
+                    return;
+                }
+
+                list.innerHTML = q.docs.map(docSnap => {
+                    const d = docSnap.data();
+                    const id = docSnap.id;
+                    const role = d.role || 'user';
+                    const label = d.email ? `${d.email} (${id})` : id;
+                    return `
+                        <div class="role-row">
+                            <div>
+                                <strong>${label}</strong>
+                                <div class="small">${role}</div>
+                            </div>
+                            <div style="display:flex;gap:8px;">
+                                <button class="icon-btn" onclick="window.toggleRoleFirestore('${id}','${role}')">Toggle</button>
+                                <button class="icon-btn danger" onclick="window.setRoleFirestore('${id}','user')">Set user</button>
+                                <button class="icon-btn" onclick="window.setRoleFirestore('${id}','admin')">Set admin</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error('Firestore unavailable, falling back to localStorage', e);
+                renderRolesFromLocal();
+            }
+        }
+
+        async function setRoleFirestore(uid, role) {
+            try {
+                await updateDoc(doc(db, 'users', uid), { role });
+                await renderRolesFromFirestore();
+                alert(`Updated ${uid} → ${role}`);
+            } catch (e) {
+                // if doc doesn't exist, create it
+                try {
+                    await setDoc(doc(db, 'users', uid), { role });
+                    await renderRolesFromFirestore();
+                    alert(`Created ${uid} → ${role}`);
+                } catch (err) {
+                    console.error('Failed to set role in Firestore', err);
+                    alert('Failed to update role: ' + err.message);
+                }
+            }
+        }
+
+        async function toggleRoleFirestore(uid, currentRole) {
+            const newRole = currentRole === 'admin' ? 'user' : 'admin';
+            await setRoleFirestore(uid, newRole);
+        }
+
+        // Fallback localStorage rendering for environments without Firestore
+        const ROLES_KEY = 'userRoles';
+        function renderRolesFromLocal() {
+            try {
+                const roles = JSON.parse(localStorage.getItem(ROLES_KEY) || '{}');
+                const list = document.getElementById('rolesList');
+                const entries = Object.entries(roles);
+                if (!entries.length) return list.innerHTML = '<p class="small">No roles assigned yet.</p>';
+                list.innerHTML = entries.map(([id, role]) => `
+                    <div class="role-row">
+                        <div>
+                            <strong>${id}</strong>
+                            <div class="small">${role}</div>
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            <button class="icon-btn" onclick="window.toggleRoleLocal('${id}')">Toggle</button>
+                            <button class="icon-btn danger" onclick="window.removeRoleLocal('${id}')">Remove</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('Unable to render local roles', e);
+            }
+        }
+
+        window.toggleRoleLocal = function(id) {
+            const roles = JSON.parse(localStorage.getItem(ROLES_KEY) || '{}');
+            roles[id] = roles[id] === 'admin' ? 'user' : 'admin';
+            localStorage.setItem(ROLES_KEY, JSON.stringify(roles));
+            renderRolesFromLocal();
+        }
+
+        window.removeRoleLocal = function(id) {
+            const roles = JSON.parse(localStorage.getItem(ROLES_KEY) || '{}');
+            delete roles[id];
+            localStorage.setItem(ROLES_KEY, JSON.stringify(roles));
+            renderRolesFromLocal();
+        }
+
+        document.getElementById('roleForm').addEventListener('submit', async function(e){
+            e.preventDefault();
+            const identifier = document.getElementById('userIdentifier').value.trim();
+            const role = document.getElementById('roleSelect').value;
+            if (!identifier) return alert('Enter email or UID');
+
+            try {
+                // If identifier looks like an email, query by email
+                if (identifier.includes('@')) {
+                    const q = query(collection(db, 'users'), where('email', '==', identifier));
+                    const snaps = await getDocs(q);
+                    if (snaps.empty) return alert('No user found for that email');
+                    for (const s of snaps.docs) {
+                        await setRoleFirestore(s.id, role);
+                    }
+                } else {
+                    // treat as UID
+                    await setRoleFirestore(identifier, role);
+                }
+                e.target.reset();
+            } catch (err) {
+                console.error('Failed to set role via Firestore', err);
+                alert('Failed to set role: ' + err.message);
+            }
+        });
+
+        // Admin-only access check
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) return window.location.href = 'login.html';
+            try {
+                const uDoc = await (await getDocs(query(collection(db,'users'), where('email','==',user.email)))).docs[0];
+                // prefer direct uid doc
+                let myRole = 'user';
+                try {
+                    const myDoc = (await getDocs(query(collection(db, 'users'), where('email','==', user.email)))).docs[0];
+                    if (myDoc) myRole = myDoc.data().role || 'user';
+                } catch (e) {
+                    console.warn('Role lookup by email failed', e);
+                }
+                // also try uid doc
+                try {
+                    const myUidDoc = await (await getDocs(query(collection(db,'users'), where('__name__','==',user.uid)))).docs[0];
+                    if (myUidDoc) myRole = myUidDoc.data().role || myRole;
+                } catch (e) {}
+
+                if (myRole !== 'admin') {
+                    alert('Access denied: Admins only');
+                    window.location.href = 'homepage.html';
+                    return;
+                }
+            } catch (e) {
+                console.error('Error checking admin role', e);
+                // fallback: allow if localStorage marks user as admin
+                const local = JSON.parse(localStorage.getItem(ROLES_KEY) || '{}');
+                const fallback = local[user.uid] || local[user.email];
+                if (fallback !== 'admin') {
+                    alert('Access denied: Admins only (and Firestore not accessible)');
+                    window.location.href = 'homepage.html';
+                    return;
+                }
+            }
+            // If there are legacy local roles, migrate them to Firestore automatically
+            async function migrateLocalRolesToFirestore() {
+                try {
+                    const raw = localStorage.getItem(ROLES_KEY);
+                    if (!raw) return;
+                    const legacy = JSON.parse(raw || '{}');
+                    if (!Object.keys(legacy).length) return;
+
+                    for (const [identifier, role] of Object.entries(legacy)) {
+                        if (identifier.includes('@')) {
+                            // try find by email
+                            const snaps = await getDocs(query(collection(db, 'users'), where('email', '==', identifier)));
+                            if (!snaps.empty) {
+                                for (const s of snaps.docs) {
+                                    await updateDoc(doc(db, 'users', s.id), { role });
+                                }
+                            } else {
+                                // create a user doc keyed by email as fallback
+                                await setDoc(doc(db, 'users', identifier), { email: identifier, role });
+                            }
+                        } else {
+                            // treat as UID
+                            await setDoc(doc(db, 'users', identifier), { role }, { merge: true });
+                        }
+                    }
+
+                    localStorage.removeItem(ROLES_KEY);
+                    console.log('Migrated local userRoles into Firestore');
+                } catch (e) {
+                    console.error('Failed to migrate local roles:', e);
+                }
+            }
+
+            await migrateLocalRolesToFirestore();
+            await renderRolesFromFirestore();
+        });
+
+        // expose helpers globally for inline onclicks
+        window.setRoleFirestore = setRoleFirestore;
+        window.toggleRoleFirestore = toggleRoleFirestore;
+    </script>
+</body>
+</html>

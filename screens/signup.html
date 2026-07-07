@@ -19,6 +19,12 @@
                 <input type="email" id="signupEmail" placeholder="Email address" required>
             </div>
             <div class="form-group">
+                <input type="text" id="signupName" placeholder="Full name" required>
+            </div>
+            <div class="form-group">
+                <input type="tel" id="signupPhone" placeholder="Phone number (optional)">
+            </div>
+            <div class="form-group">
                 <input type="password" id="signupPassword" placeholder="Password" required>
             </div>
             <div class="form-group">
@@ -31,8 +37,9 @@
     </div>
 
     <script type="module">
-        import { auth } from "../firebase-config.js";
+        import { auth, db } from "../firebase-config.js";
         import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const signupForm = document.getElementById("signupForm");
         const signupError = document.getElementById("signupError");
@@ -64,7 +71,22 @@
 
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 console.log("User created:", userCredential.user);
-                
+
+                // Persist basic user data and default role to Firestore
+                const fullName = document.getElementById('signupName').value.trim();
+                const phone = document.getElementById('signupPhone').value.trim();
+                try {
+                    await setDoc(doc(db, 'users', userCredential.user.uid), {
+                        email: email,
+                        name: fullName || null,
+                        phone: phone || null,
+                        role: 'user',
+                        createdAt: serverTimestamp()
+                    });
+                } catch (e) {
+                    console.error('Failed to write user to Firestore:', e);
+                }
+
                 // Redirect to verification page on successful signup
                 window.location.href = "verification.html";
             } catch (error) {
