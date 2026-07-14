@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - Lestari Cafe</title>
-    <link rel="stylesheet" href="..\/stylesheet.css">
+    <!-- Pautan ke stylesheet.css -->
+    <link rel="stylesheet" href="../stylesheet.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="homepage-body">
 
+    <!-- Header -->
     <header class="home-header">
         <i class="fas fa-bars"></i>
         <h1 class="logo-text">Lestari Cafe</h1>
@@ -19,32 +21,73 @@
     </header>
 
     <div class="home-container">
+        
+        <!-- Hero Banner: Susunan 3 Bahagian -->
         <div class="hero-banner">
-            <div class="menu-highlight">
+            <img src="../assets/food1.jpg" alt="Makanan Kiri" class="hero-img-side">
+            
+            <div class="menu-highlight-center">
                 <h3>DISCOVER OUR SPECIAL MENU</h3>
                 <button class="order-now-btn" onclick="window.location.href='menu.html'">Order now</button>
             </div>
+            
+            <img src="../assets/food2.jpg" alt="Makanan Kanan" class="hero-img-side">
         </div>
 
+        <!-- Grid Utama untuk Quick Order & Customer Favorite -->
         <div class="home-grid">
-            <section class="quick-order">
-                <h3>QUICK ORDER</h3>
-                <div class="menu-list">
-                    <a class="menu-item" href="menu.html">Nasi Campur <span>></span></a>
-                    <a class="menu-item" href="menu.html">Nasi Goreng <span>></span></a>
-                    <a class="menu-item" href="menu.html">Aneka Mee <span>></span></a>
-                    <a class="menu-item" href="menu.html">Minuman <span>></span></a>
-                </div>
-            </section>
+            
+            
+            <!-- Quick Order -->
+<section class="quick-order">
+    <h3>QUICK ORDER</h3>
+    <div class="menu-list">
+        
+        <a href="nasi-campur.html" class="menu-item">
+            Nasi Campur <span>></span>
+        </a>
+        
+        <a href="nasi-goreng.html" class="menu-item">
+            Nasi Goreng <span>></span>
+        </a>
+        
+        <a href="aneka-mee.html" class="menu-item">
+            Aneka Mee <span>></span>
+        </a>
+        
+        <a href="minuman.html" class="menu-item">
+            Minuman <span>></span>
+        </a>
 
+    </div>
+</section>
+
+            <!-- Bahagian Customer Favorite -->
             <section class="customer-favorite">
-                <h3>CUSTOMER FAVORITE</h3>
-                <div class="fav-items">
-                    <div class="fav-card">Nasi Goreng Kampung<br><span>RM5.00</span></div>
-                    <div class="fav-card">Mee Goreng<br><span>RM4.00</span></div>
-                    <div class="fav-card">Nasi Lemak<br><span>RM4.50</span></div>
-                </div>
-            </section>
+            <div class="customer-favorite-section">
+    <h3>CUSTOMER FAVORITE</h3>
+    <div class="favorite-grid">
+        <!-- Item 1 -->
+        <div class="favorite-card">
+            <img src="../assets/nasi-goreng-kampung.jpg" alt="Nasi Goreng Kampung">
+            <h4>Nasi Goreng Kampung</h4>
+            <p>RM5.00</p>
+        </div>
+        <!-- Item 2 -->
+        <div class="favorite-card">
+            <img src="../assets/mee-goreng.jpg" alt="Mee Goreng">
+            <h4>Mee Goreng</h4>
+            <p>RM4.00</p>
+        </div>
+        <!-- Item 3 -->
+        <div class="favorite-card">
+            <img src="../assets/nasi-lemak.jpg" alt="Nasi Lemak">
+            <h4>Nasi Lemak</h4>
+            <p>RM4.50</p>
+        </div>
+    </div>
+</div>
+
         </div>
     </div>
 
