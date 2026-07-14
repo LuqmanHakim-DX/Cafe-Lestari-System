@@ -4,15 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - Lestari Cafe</title>
-    <!-- Pautan ke stylesheet.css -->
     <link rel="stylesheet" href="../stylesheet.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 <body class="homepage-body">
 
-    <!-- Header -->
+    <!-- 1. Sidebar -->
+    <div class="sidebar">
+        <h3 class="sidebar-title">menu</h3>
+        <nav>
+            <a href="profile.html" class="nav-item"><i class="fas fa-user"></i> Profile</a>
+            <a href="settings.html" class="nav-item active"><i class="fas fa-cog"></i> Settings</a>
+            <a href="help.html" class="nav-item"><i class="fas fa-question-circle"></i> Help</a>
+            <hr>
+            <a href="login.html" class="nav-item"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </nav>
+    </div>
+
+    <!-- 2. Header -->
     <header class="home-header">
-        <i class="fas fa-bars"></i>
+        <i class="fas fa-bars" id="menu-toggle" style="cursor:pointer;"></i>
         <h1 class="logo-text">Lestari Cafe</h1>
         <div class="header-icons">
             <a href="checkout.html" class="icon-button"><i class="fas fa-shopping-cart"></i></a>
@@ -20,76 +32,68 @@
         </div>
     </header>
 
+    <!-- 3. Kandungan Utama -->
     <div class="home-container">
-        
-        <!-- Hero Banner: Susunan 3 Bahagian -->
         <div class="hero-banner">
             <img src="../assets/food1.jpg" alt="Makanan Kiri" class="hero-img-side">
-            
             <div class="menu-highlight-center">
                 <h3>DISCOVER OUR SPECIAL MENU</h3>
                 <button class="order-now-btn" onclick="window.location.href='menu.html'">Order now</button>
             </div>
-            
             <img src="../assets/food2.jpg" alt="Makanan Kanan" class="hero-img-side">
         </div>
 
-        <!-- Grid Utama untuk Quick Order & Customer Favorite -->
         <div class="home-grid">
-            
-            
-            <!-- Quick Order -->
-<section class="quick-order">
-    <h3>QUICK ORDER</h3>
-    <div class="menu-list">
-        
-        <a href="nasi-campur.html" class="menu-item">
-            Nasi Campur <span>></span>
-        </a>
-        
-        <a href="nasi-goreng.html" class="menu-item">
-            Nasi Goreng <span>></span>
-        </a>
-        
-        <a href="aneka-mee.html" class="menu-item">
-            Aneka Mee <span>></span>
-        </a>
-        
-        <a href="minuman.html" class="menu-item">
-            Minuman <span>></span>
-        </a>
+            <section class="quick-order">
+                <h3>QUICK ORDER</h3>
+                <div class="menu-list">
+                    <a href="nasi-campur.html" class="menu-item">Nasi Campur <span>></span></a>
+                    <a href="nasi-goreng.html" class="menu-item">Nasi Goreng <span>></span></a>
+                    <a href="aneka-mee.html" class="menu-item">Aneka Mee <span>></span></a>
+                    <a href="minuman.html" class="menu-item">Minuman <span>></span></a>
+                </div>
+            </section>
 
-    </div>
-</section>
-
-            <!-- Bahagian Customer Favorite -->
             <section class="customer-favorite">
-            <div class="customer-favorite-section">
-    <h3>CUSTOMER FAVORITE</h3>
-    <div class="favorite-grid">
-        <!-- Item 1 -->
-        <div class="favorite-card">
-            <img src="../assets/nasi-goreng-kampung.jpg" alt="Nasi Goreng Kampung">
-            <h4>Nasi Goreng Kampung</h4>
-            <p>RM5.00</p>
-        </div>
-        <!-- Item 2 -->
-        <div class="favorite-card">
-            <img src="../assets/mee-goreng.jpg" alt="Mee Goreng">
-            <h4>Mee Goreng</h4>
-            <p>RM4.00</p>
-        </div>
-        <!-- Item 3 -->
-        <div class="favorite-card">
-            <img src="../assets/nasi-lemak.jpg" alt="Nasi Lemak">
-            <h4>Nasi Lemak</h4>
-            <p>RM4.50</p>
-        </div>
-    </div>
-</div>
-
+                <div class="customer-favorite-section">
+                    <h3>CUSTOMER FAVORITE</h3>
+                    <div class="favorite-grid">
+                        <div class="favorite-card">
+                            <img src="../assets/nasi-goreng-kampung.jpg" alt="Nasi Goreng Kampung">
+                            <h4>Nasi Goreng Kampung</h4>
+                            <p>RM5.00</p>
+                        </div>
+                        <div class="favorite-card">
+                            <img src="../assets/mee-goreng.jpg" alt="Mee Goreng">
+                            <h4>Mee Goreng</h4>
+                            <p>RM4.00</p>
+                        </div>
+                        <div class="favorite-card">
+                            <img src="../assets/nasi-lemak.jpg" alt="Nasi Lemak">
+                            <h4>Nasi Lemak</h4>
+                            <p>RM4.50</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 
+    <!-- 4. Script -->
+    <script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+
+        menuToggle.addEventListener('click', (e) => {
+            sidebar.classList.toggle('active');
+            e.stopPropagation(); 
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+    </script>
 </body>
 </html>

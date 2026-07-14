@@ -464,3 +464,38 @@ body {
     padding: 0;
     font-family: sans-serif; /* Pastikan font nampak moden */
 }
+
+/* Sidebar Style */
+/* Pastikan sidebar bertindih di atas content */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 200px;
+    height: 100vh;
+    background-color: #d1d1d1;
+    transition: 0.3s;
+    z-index: 9999; /* Pastikan ia paling atas */
+    box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+}
+
+.sidebar.active {
+    left: 0;
+}
+
+.sidebar-title { color: #888; margin-bottom: 20px; text-transform: lowercase; }
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    text-decoration: none;
+    color: #6d4c41;
+    gap: 10px;
+}
+
+.nav-item.active {
+    background-color: #c0c0c0;
+    border: 2px solid #3498db;
+    border-radius: 10px;
+}
