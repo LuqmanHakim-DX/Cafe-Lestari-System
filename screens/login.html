@@ -7,25 +7,53 @@
     <link rel="stylesheet" href="..\/stylesheet.css">
 </head>
 <body class="login-body">
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('splash')) {
+            sessionStorage.setItem('splashShown', 'true');
+            const cleanUrl = window.location.pathname;
+            history.replaceState(null, '', cleanUrl);
+        } else if (!sessionStorage.getItem('splashShown')) {
+            window.location.href = '../index.html';
+        }
+    </script>
 
-    <div class="login-card">
-        <div class="auth-tabs">
-            <a href="login.html" class="tab-btn active">Log In</a>
-            <a href="signup.html" class="tab-btn">Sign Up</a>
-        </div>
+    <div class="login-page">
+        <div class="login-card">
+            <div class="role-tabs">
+                <button id="tabCustomer" class="role-btn active">CUSTOMER</button>
+                <button id="tabAdmin" class="role-btn">ADMIN</button>
+            </div>
 
         <form id="loginForm">
             <div class="form-group">
-                <input type="email" id="loginEmail" placeholder="adam@gmail.com" required>
+                <input type="email" id="loginEmail" placeholder="Username or email" required>
             </div>
             <div class="form-group">
-                <input type="password" id="loginPassword" placeholder="**********" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
             </div>
-            
+
+            <div class="signup-link" style="margin-top:6px; margin-bottom:6px;">
+                First time user? <a href="signup.html" id="signupLink">Sign up</a>
+            </div>
+
             <button type="submit" class="login-btn">Login</button>
             <div id="loginError" style="color: red; margin-top: 10px; display: none;"></div>
         </form>
     </div>
+</div>
+
+    <style>
+        .login-body { position: relative; }
+        .login-page { max-width: 680px; margin: 0 auto; padding: 40px 16px 24px; }
+        .login-card { width: 100%; padding: 36px; border-radius: 18px; background: rgba(255,255,255,0.95); box-shadow: 0 6px 18px rgba(0,0,0,0.15); position: relative; z-index: 2; }
+        .role-tabs { display:flex; justify-content:center; gap:10px; margin-bottom: 18px; }
+        .role-btn { padding:14px 32px; border-radius:10px; border:1px solid #ddd; background:#fff; font-weight:700; letter-spacing:1px; cursor:pointer; }
+        .role-btn.active { background:#7b7670; color:#fff; box-shadow: inset 0 -3px 0 rgba(0,0,0,0.08); }
+        .form-group input { width:100%; padding:12px 10px; margin:12px 0; border:0; border-bottom:1px solid #cbb; background:transparent; }
+        .login-btn { display:block; margin:18px auto 0; padding:10px 36px; border-radius:24px; background:#333; color:#fff; border:0; cursor:pointer; }
+        @media (max-width:600px){ .login-card{margin:20px; padding:20px} }
+    </style>
 
     <script type="module">
         import { auth } from "../firebase-config.js";
@@ -33,6 +61,24 @@
 
         const loginForm = document.getElementById("loginForm");
         const loginError = document.getElementById("loginError");
+        const tabCustomer = document.getElementById("tabCustomer");
+        const tabAdmin = document.getElementById("tabAdmin");
+
+        let currentRole = 'customer';
+
+        function setRole(role){
+            currentRole = role;
+            if(role === 'admin'){
+                tabAdmin.classList.add('active');
+                tabCustomer.classList.remove('active');
+            } else {
+                tabCustomer.classList.add('active');
+                tabAdmin.classList.remove('active');
+            }
+        }
+
+        tabCustomer.addEventListener('click', () => setRole('customer'));
+        tabAdmin.addEventListener('click', () => setRole('admin'));
 
         loginForm.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -46,18 +92,22 @@
 
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 console.log("User logged in:", userCredential.user);
-                
-                // Redirect to homepage on successful login
-                window.location.href = "homepage.html";
+
+                // persist chosen role for simple client-side guard
+                try { sessionStorage.setItem('role', currentRole); } catch(e) { /* ignore */ }
+                if(currentRole === 'admin'){
+                    window.location.href = "admin.html";
+                } else {
+                    window.location.href = "homepage.html";
+                }
             } catch (error) {
                 console.error("Login error:", error.code, error.message);
                 loginError.style.display = "block";
-                
-                // Provide user-friendly error messages
+
                 if (error.code === "auth/invalid-email") {
                     loginError.textContent = "Invalid email address.";
                 } else if (error.code === "auth/user-not-found") {
-                    loginError.textContent = "No account found with this email.";
+                    loginError.textContent = currentRole === 'admin' ? "No admin account found with this email." : "No account found with this email.";
                 } else if (error.code === "auth/wrong-password") {
                     loginError.textContent = "Incorrect password.";
                 } else if (error.code === "auth/too-many-requests") {

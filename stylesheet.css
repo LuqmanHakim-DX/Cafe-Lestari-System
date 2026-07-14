@@ -121,7 +121,29 @@ body {
 
 /* --- Homepage --- */
 .homepage-body { background: #555; padding: 20px; }
-.home-header, .page-header { display: flex; justify-content: space-between; align-items: center; color: white; padding: 10px 20px; }
+.home-header, .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #333;
+    background: white;
+    padding: 14px 20px;
+}
+.home-header {
+    border: none !important;
+    margin-bottom: 24px;
+}
+.page-header {
+    border-top: 2px solid white;
+}
+.home-header .logo-text,
+.page-header .logo-text,
+.home-header i,
+.page-header i,
+.home-header .header-icons a,
+.page-header .header-icons a {
+    color: #333;
+}
 
 /* --- Hero Banner (Baru ditambah untuk Figma) --- */
 .hero-banner { display: flex; gap: 15px; margin-bottom: 20px; height: 250px; }
@@ -265,23 +287,57 @@ body {
 }
 
 /* Update bahagian .menu-card di stylesheet.css */
-.menu-card {
-    background: #e0e0e0;
-    padding: 15px;
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    position: relative;
-    max-width: 400px; /* TETAPKAN LEBAR MAKSIMUM KAD DI SINI */
-    margin: 0 auto;   /* Untuk pastikan dia duduk cantik dalam grid */
-}
-
-/* Pastikan grid tidak memaksa kad jadi terlalu lebar */
 .menu-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); /* Grid responsif */
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
     padding: 20px;
+    width: 100%;
+    max-width: 1120px;
+    margin: 0 auto;
+}
+
+.menu-card {
+    background: #d1d1d1;
+    padding: 22px;
+    border-radius: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+    width: 100%;
+    min-height: 420px;
+    max-height: 420px;
+    box-sizing: border-box;
+    color: black;
+    overflow: hidden;
+}
+
+.menu-card img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 20px;
+    border: 1px solid #bbb;
+}
+
+.card-text {
+    margin: 18px 0 0;
+    width: 100%;
+    text-align: center;
+    flex: 1;
+}
+
+.card-text h4 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.card-text p {
+    margin: 8px 0 0;
+    color: #333;
+    font-weight: 600;
 }
 
 /* Styling Utama */
@@ -303,27 +359,44 @@ body {
 
 .menu-card {
     background: #d1d1d1;
-    padding: 15px;
+    padding: 22px;
     border-radius: 20px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     position: relative;
-    height: 180px;
+    min-height: 420px;
+    width: 100%;
     color: black;
 }
 
 /* Gambar dalam Kad */
 .menu-card img {
-    width: 150px;
-    height: 150px;
+    width: 100%;
+    height: 240px;
     object-fit: cover;
-    border-radius: 15px;
+    border-radius: 18px;
     border: 1px solid #999;
 }
 
 
 /* Teks dalam Kad */
-.card-text { margin-left: 20px; flex-grow: 1; }
+.card-text {
+    margin: 0;
+    width: 100%;
+    text-align: center;
+}
+
+.card-text h4 {
+    margin: 15px 0 8px;
+    font-size: 1.05rem;
+}
+
+.card-text p {
+    margin: 0;
+    color: #333;
+    font-weight: 600;
+}
 
 /* Butang + */
 .add-btn {

@@ -342,6 +342,19 @@
     </div>
 
     <script>
+        // Simple client-side guard: ensure role is admin
+        (function(){
+            try {
+                const role = sessionStorage.getItem('role');
+                if (role !== 'admin') {
+                    // not allowed, redirect to login
+                    window.location.href = 'login.html';
+                }
+            } catch(e) {
+                window.location.href = 'login.html';
+            }
+        })();
+
         function handleManageClick(action) {
             console.log('Managing:', action);
             // TODO: Implement functionality for:
@@ -353,7 +366,8 @@
 
         function handleLogout() {
             if (confirm('Are you sure you want to logout?')) {
-                localStorage.clear();
+                try { sessionStorage.removeItem('role'); } catch(e){}
+                try { localStorage.clear(); } catch(e){}
                 window.location.href = 'login.html';
             }
         }
