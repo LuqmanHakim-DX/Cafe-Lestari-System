@@ -13,9 +13,31 @@
 </head>
 <body>
 
+    <div class="sidebar">
+        <h3 class="sidebar-title">menu</h3>
+        <nav class="nav-links">
+            <a href="menu.html" class="nav-item">
+                <i class="fas fa-utensils"></i> Menu
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user"></i> Profile
+            </a>
+            <a href="settings.html" class="nav-item active">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="help.html" class="nav-item">
+                <i class="fas fa-question-circle"></i> Help
+            </a>
+            <hr>
+            <a href="login.html" class="nav-item logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </nav>
+    </div>
+
     <!-- Header -->
     <header class="home-header">
-        <i class="fas fa-chevron-left" onclick="history.back()"></i>
+        <i class="fas fa-bars" id="menu-toggle" style="cursor:pointer;"></i>
         <h1 class="logo-text">Lestari Cafe</h1>
        <div class="header-icons">
     <a href="checkout.html" class="icon-button">
@@ -33,52 +55,14 @@
         </div>
 
         <!-- Menu Grid -->
-        <div class="menu-grid">
-    <!-- Teh-o-ais -->
-    <div class="menu-card">
-        <img src="../assets/teh-o-ais.jpg" alt="Teh-o-ais" class="card-img">
-        <div class="card-text">
-            <h4>Teh-o-ais</h4>
-            <p>RM1.00</p>
-        </div>
-        <button class="add-btn" onclick="addToCart('Teh-o-ais', 1.00)">+</button>
-    </div>
-
-    <!-- Kopi O Ais -->
-    <div class="menu-card">
-        <img src="../assets/kopi-o-ais.jpg" alt="Kopi O Ais" class="card-img">
-        <div class="card-text">
-            <h4>Kopi O Ais</h4>
-            <p>RM2.00</p>
-        </div>
-        <button class="add-btn" onclick="addToCart('Kopi O Ais', 2.00)">+</button>
-    </div>
-
-    <!-- Teh Ais -->
-    <div class="menu-card">
-        <img src="../assets/teh-ais.jpg" alt="Teh Ais" class="card-img">
-        <div class="card-text">
-            <h4>Teh Ais</h4>
-            <p>RM3.00</p>
-        </div>
-        <button class="add-btn" onclick="addToCart('Teh Ais', 3.00)">+</button>
-    </div>
-
-    <!-- Milo Ais -->
-    <div class="menu-card">
-        <img src="../assets/milo-ais.jpg" alt="Milo Ais" class="card-img">
-        <div class="card-text">
-            <h4>Milo Ais</h4>
-            <p>RM3.00</p>
-        </div>
-        <button class="add-btn" onclick="addToCart('Milo Ais', 3.00)">+</button>
-    </div>
-</div>
+        <div id="menu-grid" class="menu-grid"></div>
 
         </div>
     </div>
 <script>
         const CART_KEY = 'lestariCart';
+        const MENU_KEY = 'lestariMenuItems';
+        const CATEGORY = 'Minuman';
 
         function getCart() {
             const saved = localStorage.getItem(CART_KEY);
@@ -87,6 +71,89 @@
 
         function saveCart(cart) {
             localStorage.setItem(CART_KEY, JSON.stringify(cart));
+        }
+
+        function inferMenuCategory(name) {
+            const loweredName = (name || '').toLowerCase();
+            if (loweredName.includes('teh') || loweredName.includes('kopi') || loweredName.includes('milo')) {
+                return 'Minuman';
+            }
+            if (loweredName.includes('mee')) {
+                return 'Aneka Mee';
+            }
+            if (loweredName.includes('ayam') || loweredName.includes('campur') || loweredName.includes('tomyam')) {
+                return 'Nasi Campur';
+            }
+            return 'Nasi Goreng';
+        }
+
+        function getDefaultMenuImage(category) {
+            switch (category) {
+                case 'Nasi Campur':
+                    return '../assets/ayam-masak-merah.jpg';
+                case 'Aneka Mee':
+                    return '../assets/mee-goreng.jpg';
+                case 'Minuman':
+                    return '../assets/teh-tarik.jpg';
+                default:
+                    return '../assets/nasi-goreng-kampung.jpg';
+            }
+        }
+
+        function getMenuItems() {
+            const saved = localStorage.getItem(MENU_KEY);
+            const defaultMenu = [
+                { name: 'Teh-o-ais', price: 1.00, description: 'Iced tea with sweet flavour.', category: 'Minuman', image: '../assets/teh-o-ais.jpg' },
+                { name: 'Kopi O Ais', price: 2.00, description: 'Iced black coffee.', category: 'Minuman', image: '../assets/kopi-o-ais.jpg' },
+                { name: 'Teh Ais', price: 3.00, description: 'Sweet iced tea.', category: 'Minuman', image: '../assets/teh-ais.jpg' },
+                { name: 'Milo Ais', price: 3.00, description: 'Cold Milo drink.', category: 'Minuman', image: '../assets/milo-ais.jpg' }
+            ];
+
+            if (!saved) {
+                localStorage.setItem(MENU_KEY, JSON.stringify(defaultMenu));
+                return defaultMenu;
+            }
+
+            try {
+                const parsed = JSON.parse(saved);
+                if (!Array.isArray(parsed) || !parsed.length) {
+                    return defaultMenu;
+                }
+
+                return parsed
+                    .filter((item) => (item.category || inferMenuCategory(item.name)) === CATEGORY)
+                    .map((item) => ({
+                        ...item,
+                        category: item.category || inferMenuCategory(item.name),
+                        image: item.image || getDefaultMenuImage(item.category || inferMenuCategory(item.name))
+                    }));
+            } catch (error) {
+                console.error('Unable to parse menu items', error);
+                return defaultMenu;
+            }
+        }
+
+        function renderMenuItems() {
+            const menuItems = getMenuItems();
+            const container = document.getElementById('menu-grid');
+            if (!container) return;
+
+            if (!menuItems.length) {
+                container.innerHTML = '<p class="empty-cart">No items available for this category yet.</p>';
+                return;
+            }
+
+            container.innerHTML = menuItems.map((item) => `
+                <div class="menu-card">
+                    <img src="${item.image}" alt="${item.name}" class="card-img" onerror="this.src='../assets/teh-tarik.jpg'">
+                    <div class="card-text">
+                        <h4>${item.name}</h4>
+                        <p>${item.description || 'Freshly prepared.'}</p>
+                        <p>RM${Number(item.price).toFixed(2)}</p>
+                    </div>
+                    <button class="add-btn" onclick="addToCart('${item.name}', ${Number(item.price)})">+</button>
+                </div>
+            `).join('');
         }
 
         function addToCart(name, price) {
@@ -108,12 +175,30 @@
         }
 
         window.addEventListener('load', () => {
+            renderMenuItems();
             const cart = getCart();
             const cartCount = document.getElementById('cart-count');
             if (cartCount) {
                 cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
             }
         });
+    </script>
+    <script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+
+        if (menuToggle && sidebar) {
+            menuToggle.addEventListener('click', (e) => {
+                sidebar.classList.toggle('active');
+                e.stopPropagation();
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        }
     </script>
 </body>
 </html>

@@ -11,8 +11,30 @@
 </head>
 <body class="homepage-body">
 
+    <div class="sidebar">
+        <h3 class="sidebar-title">menu</h3>
+        <nav class="nav-links">
+            <a href="menu.html" class="nav-item active">
+                <i class="fas fa-utensils"></i> Menu
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user"></i> Profile
+            </a>
+            <a href="settings.html" class="nav-item">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="help.html" class="nav-item">
+                <i class="fas fa-question-circle"></i> Help
+            </a>
+            <hr>
+            <a href="login.html" class="nav-item logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </nav>
+    </div>
+
     <header class="page-header">
-        <i class="fas fa-chevron-left" onclick="window.location.href='homepage.html'"></i>
+        <i class="fas fa-bars" id="menu-toggle" style="cursor:pointer;"></i>
         <h1>Menu</h1>
         <div class="header-icons">
             <i class="fas fa-home" onclick="window.location.href='homepage.html'"></i>
@@ -27,6 +49,16 @@
     <div class="page-content">
         <section class="menu-actions">
             <button class="order-now-btn" onclick="window.location.href='checkout.html'">View Cart</button>
+        </section>
+
+        <section class="menu-section">
+            <h2>Kategori Makanan</h2>
+            <div class="menu-grid">
+                <button class="order-now-btn" onclick="window.location.href='nasi-goreng.html'">Nasi Goreng</button>
+                <button class="order-now-btn" onclick="window.location.href='nasi-campur.html'">Nasi Campur</button>
+                <button class="order-now-btn" onclick="window.location.href='aneka-mee.html'">Aneka Mee</button>
+                <button class="order-now-btn" onclick="window.location.href='minuman.html'">Minuman</button>
+            </div>
         </section>
 
         <section class="menu-section">
@@ -48,13 +80,40 @@
             localStorage.setItem(CART_KEY, JSON.stringify(cart));
         }
 
+        function inferMenuCategory(name) {
+            const loweredName = (name || '').toLowerCase();
+            if (loweredName.includes('teh') || loweredName.includes('kopi') || loweredName.includes('milo')) {
+                return 'Minuman';
+            }
+            if (loweredName.includes('mee')) {
+                return 'Aneka Mee';
+            }
+            if (loweredName.includes('ayam') || loweredName.includes('campur') || loweredName.includes('tomyam')) {
+                return 'Nasi Campur';
+            }
+            return 'Nasi Goreng';
+        }
+
+        function getDefaultMenuImage(category) {
+            switch (category) {
+                case 'Nasi Campur':
+                    return '../assets/ayam-masak-merah.jpg';
+                case 'Aneka Mee':
+                    return '../assets/mee-goreng.jpg';
+                case 'Minuman':
+                    return '../assets/teh-tarik.jpg';
+                default:
+                    return '../assets/nasi-goreng-kampung.jpg';
+            }
+        }
+
         function getMenuItems() {
             const saved = localStorage.getItem(MENU_KEY);
             const defaultMenu = [
-                { name: 'Nasi Goreng Kampung', price: 5.00, description: 'Fried rice with egg, chicken, and sambal.', image: '../assets/nasi-goreng-kampung.jpg' },
-                { name: 'Mee Goreng', price: 4.00, description: 'Classic stir-fried noodles with vegetables.', image: '../assets/mee-goreng.jpg' },
-                { name: 'Nasi Lemak', price: 4.50, description: 'Coconut rice served with sambal and egg.', image: '../assets/nasi-lemak.jpg' },
-                { name: 'Teh Tarik', price: 2.50, description: 'Creamy milk tea pulled to perfection.', image: '../assets/teh-tarik.jpg' }
+                { name: 'Nasi Goreng Kampung', price: 5.00, description: 'Fried rice with egg, chicken, and sambal.', category: 'Nasi Goreng', image: '../assets/nasi-goreng-kampung.jpg' },
+                { name: 'Mee Goreng', price: 4.00, description: 'Classic stir-fried noodles with vegetables.', category: 'Aneka Mee', image: '../assets/mee-goreng.jpg' },
+                { name: 'Nasi Lemak', price: 4.50, description: 'Coconut rice served with sambal and egg.', category: 'Nasi Campur', image: '../assets/nasi-lemak.jpg' },
+                { name: 'Teh Tarik', price: 2.50, description: 'Creamy milk tea pulled to perfection.', category: 'Minuman', image: '../assets/teh-tarik.jpg' }
             ];
 
             if (!saved) {
@@ -63,14 +122,18 @@
             }
 
             const parsed = JSON.parse(saved);
-            const normalized = parsed.map(item => {
-                const defaultItem = defaultMenu.find(menu => menu.name === item.name);
+            if (!Array.isArray(parsed) || !parsed.length) {
+                return defaultMenu;
+            }
+
+            return parsed.map((item) => {
+                const category = item.category || inferMenuCategory(item.name);
                 return {
                     ...item,
-                    image: item.image && item.image.startsWith('../assets/') ? item.image : (defaultItem ? defaultItem.image : item.image)
+                    category,
+                    image: item.image || getDefaultMenuImage(category)
                 };
             });
-            return normalized;
         }
 
         function renderMenuItems() {
@@ -111,6 +174,23 @@
             const cart = getCart();
             document.getElementById('cart-count').textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
         });
+    </script>
+    <script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+
+        if (menuToggle && sidebar) {
+            menuToggle.addEventListener('click', (e) => {
+                sidebar.classList.toggle('active');
+                e.stopPropagation();
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        }
     </script>
 </body>
 </html>
