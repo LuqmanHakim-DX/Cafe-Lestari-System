@@ -16,9 +16,12 @@
         <i class="fas fa-chevron-left" onclick="history.back()"></i>
         <h1 class="logo-text">Lestari Cafe</h1>
         <div class="header-icons">
-            <i class="fas fa-shopping-cart"></i>
-            <i class="fas fa-user"></i>
-        </div>
+    <a href="checkout.html" class="icon-button">
+        <i class="fas fa-shopping-cart"></i>
+        <span id="cart-count" class="cart-badge">0</span>
+    </a>
+    <i class="fas fa-user" onclick="window.location.href='profile.html'"></i>
+</div>
     </header>
 
     <div class="content-container">
@@ -36,7 +39,7 @@
             <h4>Nasi Goreng Kampung</h4>
             <p>RM5.00</p>
         </div>
-        <button class="add-btn">+</button>
+        <button class="add-btn" onclick="addToCart('Nasi Goreng Kampung', 5.00)">+</button>
     </div>
 
     <!-- Nasi Goreng USA -->
@@ -46,7 +49,7 @@
             <h4>Nasi Goreng USA</h4>
             <p>RM7.00</p>
         </div>
-        <button class="add-btn">+</button>
+        <button class="add-btn" onclick="addToCart('Nasi Goreng USA', 7.00)">+</button>
     </div>
 
     <!-- Nasi Goreng Pattaya -->
@@ -56,7 +59,7 @@
             <h4>Nasi Goreng Pattaya</h4>
             <p>RM6.00</p>
         </div>
-        <button class="add-btn">+</button>
+        <button class="add-btn" onclick="addToCart('Nasi Goreng Pattaya', 6.00)">+</button>
     </div>
 
     <!-- Nasi Goreng Tomyam -->
@@ -66,12 +69,50 @@
             <h4>Nasi Goreng Tomyam</h4>
             <p>RM6.00</p>
         </div>
-        <button class="add-btn">+</button>
+        <button class="add-btn" onclick="addToCart('Nasi Goreng Tomyam', 6.00)">+</button>
     </div>
 </div>
 
         </div>
     </div>
+     <script>
+        const CART_KEY = 'lestariCart';
+
+        function getCart() {
+            const saved = localStorage.getItem(CART_KEY);
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function saveCart(cart) {
+            localStorage.setItem(CART_KEY, JSON.stringify(cart));
+        }
+
+        function addToCart(name, price) {
+            const cart = getCart();
+            const existing = cart.find(item => item.name === name);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({ name, price, quantity: 1 });
+            }
+            saveCart(cart);
+
+            const cartCount = document.getElementById('cart-count');
+            if (cartCount) {
+                cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+            }
+
+            alert(`${name} added to cart.`);
+        }
+
+        window.addEventListener('load', () => {
+            const cart = getCart();
+            const cartCount = document.getElementById('cart-count');
+            if (cartCount) {
+                cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+            }
+        });
+    </script>
 
 </body>
 </html>
