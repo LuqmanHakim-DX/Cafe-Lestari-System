@@ -51,7 +51,8 @@
         }
 
         .manage-menu-form input,
-        .manage-menu-form textarea {
+        .manage-menu-form textarea,
+        .manage-menu-form select {
             width: 100%;
             padding: 12px 14px;
             border: 1px solid #ccc;
@@ -151,6 +152,13 @@
             <form id="menu-form" class="manage-menu-form">
                 <input id="item-name" type="text" placeholder="Item name" required>
                 <input id="item-price" type="number" step="0.01" min="0" placeholder="Price (RM)" required>
+                <select id="item-category" required>
+                    <option value="">Select category</option>
+                    <option value="Nasi Goreng">Nasi Goreng</option>
+                    <option value="Nasi Campur">Nasi Campur</option>
+                    <option value="Aneka Mee">Aneka Mee</option>
+                    <option value="Minuman">Minuman</option>
+                </select>
                 <textarea id="item-description" placeholder="Short description"></textarea>
                 <div class="manage-menu-actions" style="justify-content:flex-start; margin-top:4px;">
                     <button id="menu-submit-btn" class="login-btn" type="submit">Add Item</button>
@@ -169,11 +177,38 @@
         const MENU_KEY = 'lestariMenuItems';
         let editingIndex = null;
         const defaultMenu = [
-            { name: 'Nasi Goreng Kampung', price: 5.00, description: 'Fried rice with egg, chicken, and sambal.' },
-            { name: 'Mee Goreng', price: 4.00, description: 'Classic stir-fried noodles with vegetables.' },
-            { name: 'Nasi Lemak', price: 4.50, description: 'Coconut rice served with sambal and egg.' },
-            { name: 'Teh Tarik', price: 2.50, description: 'Creamy milk tea pulled to perfection.' }
+            { name: 'Nasi Goreng Kampung', price: 5.00, description: 'Fried rice with egg, chicken, and sambal.', category: 'Nasi Goreng', image: '../assets/nasi-goreng-kampung.jpg' },
+            { name: 'Mee Goreng', price: 4.00, description: 'Classic stir-fried noodles with vegetables.', category: 'Aneka Mee', image: '../assets/mee-goreng.jpg' },
+            { name: 'Nasi Lemak', price: 4.50, description: 'Coconut rice served with sambal and egg.', category: 'Nasi Campur', image: '../assets/nasi-lemak.jpg' },
+            { name: 'Teh Tarik', price: 2.50, description: 'Creamy milk tea pulled to perfection.', category: 'Minuman', image: '../assets/teh-tarik.jpg' }
         ];
+
+        function inferMenuCategory(name) {
+            const loweredName = (name || '').toLowerCase();
+            if (loweredName.includes('teh') || loweredName.includes('kopi') || loweredName.includes('milo')) {
+                return 'Minuman';
+            }
+            if (loweredName.includes('mee')) {
+                return 'Aneka Mee';
+            }
+            if (loweredName.includes('ayam') || loweredName.includes('campur') || loweredName.includes('tomyam')) {
+                return 'Nasi Campur';
+            }
+            return 'Nasi Goreng';
+        }
+
+        function getDefaultMenuImage(category) {
+            switch (category) {
+                case 'Nasi Campur':
+                    return '../assets/ayam-masak-merah.jpg';
+                case 'Aneka Mee':
+                    return '../assets/mee-goreng.jpg';
+                case 'Minuman':
+                    return '../assets/teh-tarik.jpg';
+                default:
+                    return '../assets/nasi-goreng-kampung.jpg';
+            }
+        }
 
         function getMenuItems() {
             const saved = localStorage.getItem(MENU_KEY);
@@ -184,7 +219,18 @@
 
             try {
                 const parsed = JSON.parse(saved);
-                return Array.isArray(parsed) && parsed.length ? parsed : defaultMenu;
+                if (!Array.isArray(parsed) || !parsed.length) {
+                    return defaultMenu;
+                }
+
+                return parsed.map((item) => {
+                    const category = item.category || inferMenuCategory(item.name);
+                    return {
+                        ...item,
+                        category,
+                        image: item.image || getDefaultMenuImage(category)
+                    };
+                });
             } catch (error) {
                 console.error('Unable to parse menu items', error);
                 return defaultMenu;
@@ -197,6 +243,7 @@
 
         function resetMenuForm() {
             document.getElementById('menu-form').reset();
+            document.getElementById('item-category').value = '';
             document.getElementById('menu-submit-btn').textContent = 'Add Item';
             document.getElementById('cancel-edit-btn').style.display = 'none';
         }
@@ -216,7 +263,7 @@
                 <div class="menu-item-row">
                     <div>
                         <strong>${item.name}</strong>
-                        <div class="menu-item-meta">${item.description || 'No description added.'}</div>
+                        <div class="menu-item-meta">Category: ${item.category || 'Uncategorized'} · ${item.description || 'No description added.'}</div>
                     </div>
                     <div class="menu-item-actions">
                         <span class="menu-item-price">RM ${Number(item.price).toFixed(2)}</span>
@@ -235,6 +282,7 @@
             editingIndex = index;
             document.getElementById('item-name').value = item.name;
             document.getElementById('item-price').value = item.price;
+            document.getElementById('item-category').value = item.category || '';
             document.getElementById('item-description').value = item.description || '';
             document.getElementById('menu-submit-btn').textContent = 'Save Changes';
             document.getElementById('cancel-edit-btn').style.display = 'inline-block';
@@ -266,19 +314,27 @@
 
             const name = document.getElementById('item-name').value.trim();
             const price = parseFloat(document.getElementById('item-price').value);
+            const category = document.getElementById('item-category').value.trim();
             const description = document.getElementById('item-description').value.trim();
 
-            if (!name || isNaN(price)) {
-                alert('Please enter a valid item name and price.');
+            if (!name || isNaN(price) || !category) {
+                alert('Please enter a valid item name, category, and price.');
                 return;
             }
 
             const items = getMenuItems();
             if (editingIndex !== null && items[editingIndex]) {
-                items[editingIndex] = { ...items[editingIndex], name, price, description };
+                items[editingIndex] = {
+                    ...items[editingIndex],
+                    name,
+                    price,
+                    category,
+                    description,
+                    image: items[editingIndex].image || getDefaultMenuImage(category)
+                };
                 alert(`${name} updated in the menu.`);
             } else {
-                items.push({ name, price, description });
+                items.push({ name, price, category, description, image: getDefaultMenuImage(category) });
                 alert(`${name} added to the menu.`);
             }
 
