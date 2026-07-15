@@ -48,17 +48,27 @@
 
         function getMenuItems() {
             const saved = localStorage.getItem(MENU_KEY);
+            const defaultMenu = [
+                { name: 'Nasi Goreng Kampung', price: 5.00, description: 'Fried rice with egg, chicken, and sambal.', image: '../assets/nasi-goreng-kampung.jpg' },
+                { name: 'Mee Goreng', price: 4.00, description: 'Classic stir-fried noodles with vegetables.', image: '../assets/mee-goreng.jpg' },
+                { name: 'Nasi Lemak', price: 4.50, description: 'Coconut rice served with sambal and egg.', image: '../assets/nasi-lemak.jpg' },
+                { name: 'Teh Tarik', price: 2.50, description: 'Creamy milk tea pulled to perfection.', image: '../assets/teh-tarik.jpg' }
+            ];
+
             if (!saved) {
-                const defaultMenu = [
-                    { name: 'Nasi Goreng Kampung', price: 5.00, description: 'Fried rice with egg, chicken, and sambal.', image: '../assets/nasi-goreng-kampung.jpg' },
-                    { name: 'Mee Goreng', price: 4.00, description: 'Classic stir-fried noodles with vegetables.', image: '../assets/mee-goreng.jpg' },
-                    { name: 'Nasi Lemak', price: 4.50, description: 'Coconut rice served with sambal and egg.', image: '../assets/nasi-lemak.jpg' },
-                    { name: 'Teh Tarik', price: 2.50, description: 'Creamy milk tea pulled to perfection.', image: '../assets/teh-tarik.jpg' }
-                ];
                 localStorage.setItem(MENU_KEY, JSON.stringify(defaultMenu));
                 return defaultMenu;
             }
-            return JSON.parse(saved);
+
+            const parsed = JSON.parse(saved);
+            const normalized = parsed.map(item => {
+                const defaultItem = defaultMenu.find(menu => menu.name === item.name);
+                return {
+                    ...item,
+                    image: item.image && item.image.startsWith('../assets/') ? item.image : (defaultItem ? defaultItem.image : item.image)
+                };
+            });
+            return normalized;
         }
 
         function renderMenuItems() {
@@ -68,7 +78,7 @@
 
             container.innerHTML = menuItems.map((item) => `
                 <article class="menu-card">
-                    <img src="${item.image}" alt="${item.name}" class="menu-item-img" onerror="this.src='../assets/placeholder.jpg'">
+                    <img src="${item.image}" alt="${item.name}" class="menu-item-img" onerror="this.src='../assets/nasi-goreng-kampung.jpg'">
                     <div class="card-content">
                         <h3>${item.name}</h3>
                         <p>${item.description}</p>
