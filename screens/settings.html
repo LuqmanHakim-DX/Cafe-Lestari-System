@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Lestari Cafe</title>
+    <!-- Pautan ke CSS -->
+    <link rel="stylesheet" href="../stylesheet.css">
+    <!-- Font Awesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="homepage-body">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h3 class="sidebar-title">menu</h3>
+        <nav>
+            <a href="homepage.html" class="nav-item"><i class="fas fa-home"></i> Home</a>
+            <a href="profile.html" class="nav-item"><i class="fas fa-user"></i> Profile</a>
+            <a href="settings.html" class="nav-item active"><i class="fas fa-cog"></i> Settings</a>
+            <hr>
+            <a href="login.html" class="nav-item"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </nav>
+    </div>
+
+    <!-- Header -->
+    <header class="home-header">
+        <i class="fas fa-bars" id="menu-toggle" style="cursor:pointer;"></i>
+        <h1 class="logo-text">Settings</h1>
+        <div class="header-icons">
+            <a href="checkout.html" class="icon-button"><i class="fas fa-shopping-cart"></i></a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="settings-container">
+        <h2 class="settings-title"><i class="fas fa-cog"></i> Settings</h2>
+        
+        <!-- Dark Mode -->
+        <div class="setting-item">
+            <div class="setting-info">
+                <i class="fas fa-moon"></i> <span>Dark Mode</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="dark-mode-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <!-- Notifications -->
+        <div class="setting-item">
+            <div class="setting-info">
+                <i class="fas fa-bell"></i> <span>Enable Notifications</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="notification-toggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        
+        <button class="save-btn" id="save-btn">Save Changes</button>
+    </div>
+
+    <!-- Script -->
+    <script>
+        // 1. Sidebar Toggle Logic
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+
+        menuToggle.addEventListener('click', (e) => {
+            sidebar.classList.toggle('active');
+            e.stopPropagation(); 
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+        // 2. Dark Mode Logic
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        darkModeToggle.addEventListener('change', () => {
+            document.body.classList.toggle('dark-theme');
+        });
+
+        // 3. Save Changes & Redirect Logic
+        const saveBtn = document.getElementById('save-btn');
+        saveBtn.addEventListener('click', () => {
+            // Anda boleh tambah kod untuk hantar data ke server di sini
+            alert("Settings saved successfully!"); 
+            window.location.href = "homepage.html";
+        });
+    </script>
+</body>
+</html>

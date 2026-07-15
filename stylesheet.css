@@ -556,3 +556,89 @@ body {
     color: #555;
     line-height: 1.5;
 }
+
+/* Container Utama */
+.settings-container {
+    max-width: 600px;
+    margin: 40px auto;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 15px; /* Sudut lebih bulat */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1); /* Bayang lembut */
+}
+
+/* Tajuk di dalam card */
+.settings-container h2 {
+    margin-bottom: 25px;
+    color: #333;
+    font-size: 24px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+/* Setiap item setting */
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    font-size: 16px;
+    color: #555;
+}
+
+/* Butang Save */
+.save-btn {
+    width: 100%; /* Butang penuh */
+    padding: 12px;
+    background-color: #6d4c41; /* Warna tema cafe anda */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 20px;
+}
+
+.save-btn:hover {
+    background-color: #5d4037;
+}
+
+/* CSS untuk Toggle Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 25px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 25px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 19px;
+    width: 19px;
+    left: 3px; bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider { background-color: #6d4c41; }
+input:checked + .slider:before { transform: translateX(25px); }
+
+/* Class untuk Dark Theme (Anda boleh ubah warna mengikut kesesuaian) */
+.dark-theme {
+    background-color: #333;
+    color: white;
+}
