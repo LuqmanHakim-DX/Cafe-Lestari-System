@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help - Lestari Cafe</title>
+    <link rel="stylesheet" href="..\/stylesheet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="homepage-body">
+
+    <header class="page-header">
+        <i class="fas fa-chevron-left" onclick="window.location.href='homepage.html'"></i>
+        <h1>Help Center</h1>
+        <div class="header-icons">
+            <i class="fas fa-home" onclick="window.location.href='homepage.html'"></i>
+            <a href="checkout.html" class="icon-button">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="cart-count" class="cart-badge">0</span>
+            </a>
+        </div>
+    </header>
+
+    <div class="page-content">
+        <section class="help-panel">
+            <h2>How can we help you?</h2>
+            <p class="help-description">Welcome to the Cafe System Help Center. This page is designed to assist you in using the system easily and efficiently. If you experience any issues or have questions, please refer to the information below.</p>
+            <div class="help-grid">
+                <div class="help-card">
+                    <div class="help-icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <h3>Our Main Office</h3>
+                    <p>Cafe Lestari, UiTM Cawangan Kuala Terengganu</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-icon"><i class="fas fa-phone-alt"></i></div>
+                    <h3>Phone Number</h3>
+                    <p>09-9785643</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-icon"><i class="fas fa-fax"></i></div>
+                    <h3>Fax</h3>
+                    <p>123-987-7800</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-icon"><i class="fas fa-envelope"></i></div>
+                    <h3>Email</h3>
+                    <p>cafelestari@gmail.com</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const CART_KEY = 'lestariCart';
+        function getCart() {
+            const saved = localStorage.getItem(CART_KEY);
+            return saved ? JSON.parse(saved) : [];
+        }
+        function updateCartBadge() {
+            const count = getCart().reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cart-count');
+            if (badge) badge.textContent = count;
+        }
+        window.addEventListener('load', updateCartBadge);
+    </script>
+
+</body>
+</html>

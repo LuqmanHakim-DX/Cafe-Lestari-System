@@ -499,3 +499,60 @@ body {
     border: 2px solid #3498db;
     border-radius: 10px;
 }
+
+.help-panel {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 30px;
+    background: #f4f4f4;
+    border-radius: 24px;
+}
+
+.help-panel h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+.help-description {
+    color: #555;
+    margin-bottom: 30px;
+    line-height: 1.7;
+}
+
+.help-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.help-card {
+    background: #e7e7e7;
+    border-radius: 18px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.help-icon {
+    width: 55px;
+    height: 55px;
+    background: #d1d1d1;
+    border-radius: 50%;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 18px;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.help-card h3 {
+    margin: 0 0 10px;
+    color: #333;
+}
+
+.help-card p {
+    margin: 0;
+    color: #555;
+    line-height: 1.5;
+}
