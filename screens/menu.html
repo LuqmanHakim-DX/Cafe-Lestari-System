@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu - Lestari Cafe</title>
-    <link rel="stylesheet" href="..\/stylesheet.css">
+    <link rel="stylesheet" href="../stylesheet.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="homepage-body">
@@ -50,22 +50,15 @@
             const saved = localStorage.getItem(MENU_KEY);
             if (!saved) {
                 const defaultMenu = [
-                    { name: 'Nasi Goreng Kampung', price: 5.00, description: 'Fried rice with egg, chicken, and sambal.' },
-                    { name: 'Mee Goreng', price: 4.00, description: 'Classic stir-fried noodles with vegetables.' },
-                    { name: 'Nasi Lemak', price: 4.50, description: 'Coconut rice served with sambal and egg.' },
-                    { name: 'Teh Tarik', price: 2.50, description: 'Creamy milk tea pulled to perfection.' }
+                    { name: 'Nasi Goreng Kampung', price: 5.00, description: 'Fried rice with egg, chicken, and sambal.', image: '../assets/nasi-goreng-kampung.jpg' },
+                    { name: 'Mee Goreng', price: 4.00, description: 'Classic stir-fried noodles with vegetables.', image: '../assets/mee-goreng.jpg' },
+                    { name: 'Nasi Lemak', price: 4.50, description: 'Coconut rice served with sambal and egg.', image: '../assets/nasi-lemak.jpg' },
+                    { name: 'Teh Tarik', price: 2.50, description: 'Creamy milk tea pulled to perfection.', image: '../assets/teh-tarik.jpg' }
                 ];
                 localStorage.setItem(MENU_KEY, JSON.stringify(defaultMenu));
                 return defaultMenu;
             }
-
-            try {
-                const parsed = JSON.parse(saved);
-                return Array.isArray(parsed) && parsed.length ? parsed : [];
-            } catch (error) {
-                console.error('Unable to parse menu items', error);
-                return [];
-            }
+            return JSON.parse(saved);
         }
 
         function renderMenuItems() {
@@ -73,16 +66,12 @@
             const container = document.getElementById('menu-grid');
             if (!container) return;
 
-            if (!menuItems.length) {
-                container.innerHTML = '<p class="empty-cart">No menu items available right now.</p>';
-                return;
-            }
-
             container.innerHTML = menuItems.map((item) => `
                 <article class="menu-card">
-                    <div>
+                    <img src="${item.image}" alt="${item.name}" class="menu-item-img" onerror="this.src='../assets/placeholder.jpg'">
+                    <div class="card-content">
                         <h3>${item.name}</h3>
-                        <p>${item.description || 'Freshly prepared at Lestari Cafe.'}</p>
+                        <p>${item.description}</p>
                     </div>
                     <div class="menu-card-footer">
                         <span>RM${Number(item.price).toFixed(2)}</span>
@@ -90,12 +79,6 @@
                     </div>
                 </article>
             `).join('');
-        }
-
-        function updateCount() {
-            const cart = getCart();
-            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-            document.getElementById('cart-count').textContent = count;
         }
 
         function addToCart(name, price) {
@@ -107,15 +90,15 @@
                 cart.push({ name, price, quantity: 1 });
             }
             saveCart(cart);
-            updateCount();
+            document.getElementById('cart-count').textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
             alert(`${name} added to cart.`);
         }
 
         window.addEventListener('load', () => {
             renderMenuItems();
-            updateCount();
+            const cart = getCart();
+            document.getElementById('cart-count').textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
         });
     </script>
-
 </body>
 </html>
