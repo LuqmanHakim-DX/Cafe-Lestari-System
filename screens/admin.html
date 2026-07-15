@@ -305,17 +305,23 @@
             <div class="admin-section">
                 <div class="section-title">Admin Information</div>
                 <div class="admin-info">
-                    <div class="info-field">
-                        <label>Full Name</label>
-                        <input type="text" placeholder="Enter full name" />
+                    <div class="profile-card" style="padding: 20px; margin-bottom: 12px; text-align: left;">
+                        <div class="profile-avatar" id="adminInfoAvatar">A</div>
+                        <h3 id="adminInfoName">Loading...</h3>
+                        <p class="profile-email" id="adminInfoEmail">Loading...</p>
                     </div>
-                    <div class="info-field">
-                        <label>Email</label>
-                        <input type="email" placeholder="Enter email" />
+
+                    <div class="profile-item">
+                        <strong>Email:</strong> <span id="adminInfoDetailEmail">Loading...</span>
                     </div>
-                    <div class="info-field">
-                        <label>Phone</label>
-                        <input type="tel" placeholder="Enter phone number" />
+                    <div class="profile-item">
+                        <strong>User ID:</strong> <span id="adminInfoDetailUid">Loading...</span>
+                    </div>
+                    <div class="profile-item">
+                        <strong>Role:</strong> <span id="adminInfoDetailRole">Loading...</span>
+                    </div>
+                    <div class="profile-item">
+                        <strong>Account Created:</strong> <span id="adminInfoDetailCreated">Loading...</span>
                     </div>
                 </div>
             </div>
@@ -341,13 +347,16 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { auth, db } from "../firebase-config.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
         // Simple client-side guard: ensure role is admin
         (function(){
             try {
                 const role = sessionStorage.getItem('role');
                 if (role !== 'admin') {
-                    // not allowed, redirect to login
                     window.location.href = 'login.html';
                 }
             } catch(e) {
@@ -355,12 +364,64 @@
             }
         })();
 
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const email = user.email || 'No email';
+            const displayName = user.displayName || email.split('@')[0];
+            const uid = user.uid;
+            const createdAt = user.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'N/A';
+
+            const firstLetter = displayName.charAt(0).toUpperCase();
+            const avatar = document.getElementById('adminInfoAvatar');
+            avatar.textContent = firstLetter;
+            avatar.style.backgroundColor = getColorForLetter(firstLetter);
+
+            document.getElementById('adminInfoName').textContent = displayName;
+            document.getElementById('adminInfoEmail').textContent = email;
+            document.getElementById('adminInfoDetailEmail').textContent = email;
+            document.getElementById('adminInfoDetailUid').textContent = uid.substring(0, 16) + '...';
+            document.getElementById('adminInfoDetailCreated').textContent = createdAt;
+
+            let role = 'user';
+            try {
+                const userDoc = await getDoc(doc(db, 'users', uid));
+                if (userDoc.exists()) {
+                    role = userDoc.data().role || 'user';
+                } else {
+                    const emailDoc = await getDoc(doc(db, 'users', email));
+                    if (emailDoc && emailDoc.exists()) role = emailDoc.data().role || 'user';
+                }
+            } catch (e) {
+                try {
+                    const roles = JSON.parse(localStorage.getItem('userRoles') || '{}');
+                    role = roles[uid] || roles[email] || 'user';
+                } catch (err) {
+                    role = 'user';
+                }
+            }
+
+            document.getElementById('adminInfoDetailRole').textContent = role;
+
+            if (role !== 'admin') {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function getColorForLetter(letter) {
+            const colors = [
+                '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+                '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B88B', '#ABEBC6'
+            ];
+            const charCode = letter.charCodeAt(0);
+            return colors[charCode % colors.length];
+        }
+
         function handleManageClick(action) {
             console.log('Managing:', action);
-            // TODO: Implement functionality for:
-            // - Add Menu
-            // - Manage Payment
-            // - Manage Customer
             alert('Feature coming soon: ' + action);
         }
 

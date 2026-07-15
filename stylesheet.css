@@ -398,6 +398,152 @@ body {
     font-weight: 600;
 }
 
+/* --- Mobile Responsive Improvements --- */
+@media (max-width: 768px) {
+    body {
+        overflow-x: hidden;
+        background-attachment: scroll;
+    }
+
+    .login-body {
+        padding: 20px 12px;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .login-card, .success-card, .payment-container {
+        padding: 24px 16px;
+        border-radius: 20px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .auth-tabs {
+        flex-direction: column;
+    }
+
+    .form-group input {
+        font-size: 15px;
+        padding: 10px 0;
+    }
+
+    .home-header, .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 14px 16px;
+    }
+
+    .homepage-body {
+        padding: 12px;
+    }
+
+    .hero-banner,
+    .home-grid,
+    .fav-items,
+    .payment-methods,
+    .payment-row {
+        flex-direction: column;
+        grid-template-columns: 1fr;
+    }
+
+    .hero-banner {
+        height: auto;
+        gap: 12px;
+    }
+
+    .hero-img-side,
+    .hero-img,
+    .menu-highlight-center,
+    .menu-highlight {
+        width: 100%;
+        min-height: 180px;
+    }
+
+    .menu-highlight-container {
+        height: 220px;
+    }
+
+    .menu-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0;
+        max-width: 100%;
+    }
+
+    .menu-card {
+        min-height: auto;
+        max-height: none;
+        padding: 16px;
+    }
+
+    .menu-card img {
+        height: 200px;
+    }
+
+    .content-container {
+        padding: 20px 12px;
+    }
+
+    .search-bar {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .cart-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .payment-container h2 {
+        font-size: 1.4rem;
+    }
+
+    .payment-summary {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .profile-card {
+        padding: 20px 16px;
+    }
+
+    .profile-item {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .splash-container h1 {
+        font-size: 3.2rem;
+    }
+
+    .login-btn, .done-btn, .order-now-btn, .logout-btn {
+        padding: 13px;
+        font-size: 0.95rem;
+    }
+
+    .menu-card img {
+        height: 170px;
+    }
+
+    .card-text h4 {
+        font-size: 1rem;
+    }
+
+    .payment-method {
+        padding: 12px;
+    }
+}
+
 /* Butang + */
 .add-btn {
     position: absolute;
