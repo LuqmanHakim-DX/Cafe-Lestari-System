@@ -211,7 +211,7 @@
 
         .order-items {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 15px;
         }
 
@@ -220,7 +220,7 @@
             border: 1px solid #eee;
             border-radius: 12px;
             padding: 15px;
-            text-align: center;
+            text-align: left;
             transition: 0.3s;
         }
 
@@ -230,21 +230,44 @@
 
         .order-item-image {
             width: 100%;
-            height: 120px;
+            height: 90px;
             background: #f0f0f0;
             border-radius: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
             margin-bottom: 10px;
-            font-size: 2.5rem;
+            font-size: 2rem;
         }
 
         .order-item-name {
-            font-weight: 600;
+            font-weight: 700;
             color: #333;
             font-size: 0.95rem;
             line-height: 1.3;
+            margin-bottom: 6px;
+        }
+
+        .order-item-meta {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .order-item-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .order-item-actions button {
+            border: none;
+            border-radius: 6px;
+            padding: 7px 10px;
+            cursor: pointer;
+            background: #d97b29;
+            color: white;
+            font-size: 0.8rem;
         }
 
         @media (max-width: 1024px) {
@@ -345,16 +368,7 @@
 
             <div class="admin-section order-queue">
                 <div class="section-title">Order Queue</div>
-                <div class="order-items">
-                    <div class="order-item">
-                        <div class="order-item-image">🍛</div>
-                        <div class="order-item-name">Agem Masala Merah</div>
-                    </div>
-                    <div class="order-item">
-                        <div class="order-item-image">🍚</div>
-                        <div class="order-item-name">Nasi Goreng Kampung</div>
-                    </div>
-                </div>
+                <div class="order-items" id="order-items"></div>
             </div>
         </div>
     </div>
@@ -363,6 +377,7 @@
         import { auth, db } from "../firebase-config.js";
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getOrders, formatCurrency, downloadOrderDetails, updateOrderStatus } from './order-utils.js';
 
         // Simple client-side guard: ensure role is admin
         (function(){
@@ -421,6 +436,8 @@
             if (role !== 'admin') {
                 window.location.href = 'login.html';
             }
+
+            renderOrders();
         });
 
         function getColorForLetter(letter) {
@@ -432,7 +449,56 @@
             return colors[charCode % colors.length];
         }
 
+        function renderOrders() {
+            const orders = getOrders();
+            const container = document.getElementById('order-items');
+            if (!container) return;
+
+            if (!orders.length) {
+                container.innerHTML = '<div class="order-item"><div class="order-item-name">No payment records yet.</div></div>';
+                return;
+            }
+
+            container.innerHTML = orders.map((order) => {
+                const itemSummary = order.items.slice(0, 2).map(item => `${item.name} x${item.quantity}`).join(', ');
+                const extraCount = order.items.length > 2 ? ` +${order.items.length - 2} more` : '';
+                const canConfirm = order.status === 'Awaiting Counter Payment' || order.status === 'Pending';
+                return `
+                    <div class="order-item">
+                        <div class="order-item-image">🧾</div>
+                        <div class="order-item-name">${order.id}</div>
+                        <div class="order-item-meta">Customer: ${order.customerName}</div>
+                        <div class="order-item-meta">${itemSummary}${extraCount}</div>
+                        <div class="order-item-meta">Total: ${formatCurrency(order.total)}</div>
+                        <div class="order-item-meta">Status: ${order.status}</div>
+                        <div class="order-item-actions">
+                            <button onclick="window.downloadOrderDetails('${order.id}')">Download</button>
+                            ${canConfirm ? `<button onclick="window.confirmCashPayment('${order.id}')">Confirm</button>` : ''}
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        window.downloadOrderDetails = (orderId) => {
+            const orders = getOrders();
+            const order = orders.find(entry => entry.id === orderId);
+            if (order) {
+                downloadOrderDetails(order);
+            }
+        };
+
+        window.confirmCashPayment = (orderId) => {
+            const updatedOrder = updateOrderStatus(orderId, 'Paid');
+            if (updatedOrder) {
+                renderOrders();
+            }
+        };
+
         function handleManageClick(action) {
+            if (action === 'manage-payment') {
+                renderOrders();
+                return;
+            }
             console.log('Managing:', action);
             alert('Feature coming soon: ' + action);
         }

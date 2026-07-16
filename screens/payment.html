@@ -49,30 +49,42 @@
     <div class="page-content payment-page">
         <div class="payment-container">
             <h2>Payment</h2>
-            <p class="payment-subtitle">Complete your order with secure card payment.</p>
+            <p class="payment-subtitle">Choose how you would like to complete this order.</p>
 
             <div class="payment-methods">
-                <div class="payment-method selected">
-                    <img src="../assets/visa.svg" alt="Visa">
-                </div>
-                <div class="payment-method">
-                    <img src="../assets/mastercard.svg" alt="Mastercard">
-                </div>
+                <button type="button" class="payment-method selected" data-method="card">
+                    <div class="payment-method-content">
+                        <img src="../assets/visa.svg" alt="Card">
+                        <span class="method-label">Card</span>
+                    </div>
+                </button>
+                <button type="button" class="payment-method" data-method="cash">
+                    <div class="payment-method-content">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span class="method-label">Cash</span>
+                    </div>
+                </button>
             </div>
 
-            <div class="payment-details">
-                <div class="form-group">
-                    <label for="card-number">Card Number</label>
-                    <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
-                </div>
-                <div class="payment-row">
-                    <div class="form-group small-field">
-                        <label for="expiry-date">Expiry Date</label>
-                        <input type="text" id="expiry-date" placeholder="MM/YY" maxlength="5">
+            <div id="cash-instructions" class="cash-instructions" hidden>
+                Pay at the counter and show your order details to the staff when you arrive.
+            </div>
+
+            <div class="payment-details" id="payment-details">
+                <div id="card-payment-section" class="card-payment-section">
+                    <div class="form-group">
+                        <label for="card-number">Card Number</label>
+                        <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
                     </div>
-                    <div class="form-group small-field">
-                        <label for="cvv">CVV</label>
-                        <input type="password" id="cvv" placeholder="***" maxlength="4">
+                    <div class="payment-row">
+                        <div class="form-group small-field">
+                            <label for="expiry-date">Expiry Date</label>
+                            <input type="text" id="expiry-date" placeholder="MM/YY" maxlength="5">
+                        </div>
+                        <div class="form-group small-field">
+                            <label for="cvv">CVV</label>
+                            <input type="password" id="cvv" placeholder="***" maxlength="4">
+                        </div>
                     </div>
                 </div>
                 <div class="payment-summary">
@@ -85,16 +97,14 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { buildOrderRecord, persistOrder, downloadOrderDetails, formatCurrency } from './order-utils.js';
+
         const CART_KEY = 'lestariCart';
 
         function getCart() {
             const saved = localStorage.getItem(CART_KEY);
             return saved ? JSON.parse(saved) : [];
-        }
-
-        function formatCurrency(amount) {
-            return `RM${amount.toFixed(2)}`;
         }
 
         function calculateTotal(cart) {
@@ -120,9 +130,33 @@
             return { cardNumberValid, expiryValid, cvvValid };
         }
 
-        document.getElementById('confirm-payment-btn').addEventListener('click', () => {
+        const paymentMethodButtons = document.querySelectorAll('.payment-method');
+        const cardPaymentSection = document.getElementById('card-payment-section');
+        const cashInstructions = document.getElementById('cash-instructions');
+        const confirmPaymentButton = document.getElementById('confirm-payment-btn');
+        let selectedPaymentMethod = 'card';
+
+        function setPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            paymentMethodButtons.forEach((button) => {
+                button.classList.toggle('selected', button.dataset.method === method);
+            });
+
+            cardPaymentSection.hidden = method !== 'card';
+            cashInstructions.hidden = method === 'card';
+            confirmPaymentButton.textContent = method === 'cash' ? 'Place Order' : 'Confirm Payment';
+        }
+
+        paymentMethodButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                setPaymentMethod(button.dataset.method);
+            });
+        });
+
+        setPaymentMethod(selectedPaymentMethod);
+
+        confirmPaymentButton.addEventListener('click', () => {
             const cart = getCart();
-            const total = calculateTotal(cart);
             const message = document.getElementById('payment-message');
 
             if (cart.length === 0) {
@@ -131,20 +165,32 @@
                 return;
             }
 
-            const validation = validateCardInputs();
-            if (!validation.cardNumberValid || !validation.expiryValid || !validation.cvvValid) {
-                message.textContent = 'Please enter valid card details.';
-                message.style.color = '#e63946';
-                return;
+            if (selectedPaymentMethod === 'card') {
+                const validation = validateCardInputs();
+                if (!validation.cardNumberValid || !validation.expiryValid || !validation.cvvValid) {
+                    message.textContent = 'Please enter valid card details.';
+                    message.style.color = '#e63946';
+                    return;
+                }
             }
 
+            const customerName = localStorage.getItem('customerName') || 'Guest';
+            const customerEmail = localStorage.getItem('customerEmail') || 'guest@example.com';
+            const paymentLabel = selectedPaymentMethod === 'cash' ? 'Cash' : 'Visa';
+            const orderStatus = selectedPaymentMethod === 'cash' ? 'Awaiting Counter Payment' : 'Paid';
+            const order = persistOrder(buildOrderRecord(cart, paymentLabel, customerName, customerEmail, orderStatus));
             localStorage.removeItem(CART_KEY);
-            message.textContent = 'Payment successful! Redirecting to homepage...';
-            message.style.color = '#2a9d8f';
+            const isCash = selectedPaymentMethod === 'cash';
+            message.innerHTML = `${isCash ? 'Your order is waiting for counter payment. Please show the details below.' : 'Payment successful! Your receipt is ready.'} <button id="download-receipt-btn" style="margin-left:8px; padding:6px 10px; border:none; border-radius:6px; cursor:pointer; background:${isCash ? '#d97b29' : '#2a9d8f'}; color:white;">Download Details</button>`;
+            message.style.color = isCash ? '#d97b29' : '#2a9d8f';
+
+            document.getElementById('download-receipt-btn').addEventListener('click', () => {
+                downloadOrderDetails(order);
+            });
 
             setTimeout(() => {
                 window.location.href = 'homepage.html';
-            }, 1400);
+            }, 2000);
         });
 
         window.addEventListener('load', () => {
