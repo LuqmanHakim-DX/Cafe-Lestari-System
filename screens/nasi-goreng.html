@@ -16,6 +16,9 @@
     <div class="sidebar">
         <h3 class="sidebar-title">menu</h3>
         <nav class="nav-links">
+            <a href="homepage.html" class="nav-item">
+                <i class="fas fa-home"></i> Home
+            </a>
             <a href="menu.html" class="nav-item">
                 <i class="fas fa-utensils"></i> Menu
             </a>
@@ -109,27 +112,40 @@
                 { name: 'Nasi Goreng Tomyam', price: 6.00, description: 'Spicy fried rice with tomyam flavour.', category: 'Nasi Goreng', image: '../assets/nasi-goreng-tomyam.jpg' }
             ];
 
+            const normalizeItem = (item) => ({
+                ...item,
+                category: item.category || inferMenuCategory(item.name),
+                image: item.image || getDefaultMenuImage(item.category || inferMenuCategory(item.name))
+            });
+
             if (!saved) {
                 localStorage.setItem(MENU_KEY, JSON.stringify(defaultMenu));
-                return defaultMenu;
+                return defaultMenu.map(normalizeItem);
             }
 
             try {
                 const parsed = JSON.parse(saved);
                 if (!Array.isArray(parsed) || !parsed.length) {
-                    return defaultMenu;
+                    return defaultMenu.map(normalizeItem);
                 }
 
-                return parsed
+                const categoryItems = parsed
                     .filter((item) => (item.category || inferMenuCategory(item.name)) === CATEGORY)
-                    .map((item) => ({
-                        ...item,
-                        category: item.category || inferMenuCategory(item.name),
-                        image: item.image || getDefaultMenuImage(item.category || inferMenuCategory(item.name))
-                    }));
+                    .map(normalizeItem);
+
+                if (categoryItems.length >= defaultMenu.length) {
+                    return categoryItems;
+                }
+
+                const existingNames = new Set(categoryItems.map((item) => item.name.toLowerCase()));
+                const missingItems = defaultMenu
+                    .filter((item) => !existingNames.has(item.name.toLowerCase()))
+                    .map(normalizeItem);
+
+                return [...categoryItems, ...missingItems];
             } catch (error) {
                 console.error('Unable to parse menu items', error);
-                return defaultMenu;
+                return defaultMenu.map(normalizeItem);
             }
         }
 
